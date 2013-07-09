@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en-US">
+	<head>
+		<meta charset="UTF-8">
+		<title>Gender Poll</title>
+		<script type="text/javascript" src="/public/js/jquery.min.js"></script>
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+		<script language="javascript" type="text/javascript" src="/dist/jquery.jqplot.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="/dist/jquery.jqplot.css" />
+		<script type="text/javascript" src="/dist/plugins/jqplot.pieRenderer.min.js"></script>
+		<script type="text/javascript" src="/dist/plugins/jqplot.donutRenderer.min.js"></script>
+		<script text="text/javascript">
+			
+			var socket = io.connect('http://localhost:8000');
+
+			socket.on('gender_info', function (data){
+				console.log("data sent back:");
+				console.log(data);
+				$('#gender_info').html('<p>Males: '+data.males+'  '+'Females: '+data.females);
+
+				result = [['males', data.males], ['females', data.females]];
+
+			  	var plot1 = jQuery.jqplot ('chart', [result], 
+			    { 
+			   		seriesDefaults: {
+			        // Make this a pie chart.
+			        	renderer: jQuery.jqplot.PieRenderer, 
+			        	rendererOptions: {
+			          // Put data labels on the pie slices.
+			          // By default, labels show the percentage of the slice.
+			        	showDataLabels: true
+			        	}
+			    	}, 
+			      	legend: { show:true, location: 'e' }
+			    });
+			});
+
+
+			$(document).ready(function() {
+				$('#male_selection').submit(function() {
+
+					console.log("made selection");
+					socket.emit('vote_male');
+
+
+					return false;
+				});
+
+				$('#female_selection').submit(function() {
+
+					console.log("made selection");
+					socket.emit('vote_female');
+
+
+					return false;
+				});
+
+				$('#load').submit(function() {
+					socket.emit('load_chart');
+					return false;
+				});
+
+				$('#load').submit();
+			});
+
+		</script>
+	</head>
+	<body>
+		<div class=''>
+			<h5>SELECT YOUR GENDER</h5>
+			<form id="male_selection" action="">
+				<input type="submit" value="Male" />
+			</form>
+			or
+			<form id="female_selection" action="" method="">
+				<input type="submit" value="Female" />
+			</form>
+			<form id="load" action=""></form>
+			<div id='gender_info'></div>
+			<div id='chart'></div>
+		</div>
+	</body>
+</html>
